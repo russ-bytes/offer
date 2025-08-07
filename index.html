@@ -9,10 +9,10 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
-        /* --- V2.08 Theming & Layout --- */
+        /* --- V2.09 Theming & Layout --- */
         :root { /* Dark Mode (Default) */
             --bg-color: #111827;
-            --card-bg-color: rgba(31, 41, 55, 0.7);
+            --card-bg-color: linear-gradient(145deg, rgba(49, 61, 82, 0.7), rgba(31, 41, 55, 0.8));
             --border-color: #4b5563;
             --text-color: #E5E7EB;
             --heading-color: #F9FAFB;
@@ -24,7 +24,7 @@
 
         body.light-mode { /* Light Mode */
             --bg-color: #F9FAFB;
-            --card-bg-color: rgba(255, 255, 255, 0.7);
+            --card-bg-color: linear-gradient(145deg, rgba(255, 255, 255, 0.8), rgba(249, 250, 251, 0.7));
             --border-color: #D1D5DB;
             --text-color: #374151;
             --heading-color: #111827;
@@ -83,22 +83,34 @@
         .content-container {
             position: relative;
             z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
         }
         
-        /* NEW: 3D Card Styles */
+        #slides-container {
+            width: 100%;
+            max-width: 48rem; /* 768px */
+            height: 28rem; /* 448px */
+            position: relative;
+        }
+
+        /* NEW: Refined 3D Card Styles */
         .slide {
             transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
             position: absolute;
             width: 100%;
             height: 100%;
-            perspective: 1000px; /* Apply perspective to the slide container */
+            perspective: 1200px; 
         }
         .slide.hidden { opacity: 0; pointer-events: none; transform: scale(0.98); }
         .slide.active { opacity: 1; transform: scale(1); }
 
         .slide-card {
-            background-color: var(--card-bg-color);
-            backdrop-filter: blur(12px);
+            background: var(--card-bg-color);
+            backdrop-filter: blur(16px);
             border: 1px solid var(--border-color);
             border-radius: 1rem;
             width: 100%;
@@ -107,14 +119,14 @@
             flex-direction: column;
             justify-content: center;
             position: relative;
-            box-shadow: 0 0 40px rgba(56, 189, 248, 0.1);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
             padding: 2rem;
-            transform-style: preserve-3d; /* Enable 3D transformations */
-            transition: transform 0.1s ease-out, background-color 0.5s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+            transform-style: preserve-3d;
+            transition: transform 0.1s ease-out, background 0.5s ease, box-shadow 0.3s ease, border-color 0.3s ease;
         }
 
-        .slide-card-inner { /* New inner wrapper for content */
-            transform: translateZ(40px); /* Push content forward */
+        .slide-card-inner {
+            transform: translateZ(30px); /* Push content forward slightly */
         }
 
         .shine-overlay {
@@ -165,7 +177,7 @@
         }
     </style>
 </head>
-<body class="flex items-center justify-center min-h-screen antialiased">
+<body class="antialiased">
 
     <!-- Interactive Background -->
     <div id="background-animation-wrapper">
@@ -174,17 +186,20 @@
     </div>
 
     <!-- Main Content Container -->
-    <div class="content-container w-full max-w-4xl mx-auto px-16 md:px-8 relative">
-        <div id="slides-container" class="relative w-full h-[70vh] md:h-[60vh]">
-
+    <div class="content-container p-4">
+        <button id="prevBtn" class="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 z-20 p-3 rounded-full text-gray-400 hover:text-white hover:bg-white/10 transition-all duration-300 focus:outline-none">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 19l-7-7 7-7" /></svg>
+        </button>
+        
+        <div id="slides-container">
             <!-- Slide 1: Introduction -->
             <div id="slide-0" class="slide active">
                 <div class="slide-card">
                     <div class="shine-overlay"></div>
                     <div class="slide-card-inner text-center">
-                        <h2 class="text-4xl md:text-6xl font-medium tracking-wider">WHAT I OFFER:</h2>
-                        <h1 class="text-2xl md:text-4xl mt-4 font-normal">AI-POWERED AUTOMATION & SYSTEMS</h1>
-                        <p class="mt-8 text-lg md:text-xl max-w-2xl mx-auto" style="color: var(--muted-color);">For founders and solopreneurs ready to simplify operations and scale with intelligent systems.</p>
+                        <h2 class="text-3xl sm:text-4xl md:text-5xl font-medium tracking-wider">WHAT I OFFER:</h2>
+                        <h1 class="text-xl sm:text-2xl md:text-3xl mt-4 font-normal">AI-POWERED AUTOMATION & SYSTEMS</h1>
+                        <p class="mt-6 text-base md:text-lg max-w-2xl mx-auto" style="color: var(--muted-color);">For founders and solopreneurs ready to simplify operations and scale with intelligent systems.</p>
                     </div>
                 </div>
             </div>
@@ -194,14 +209,13 @@
                 <div class="slide-card">
                     <div class="shine-overlay"></div>
                     <div class="slide-card-inner text-center w-full">
-                        <h2 class="text-3xl md:text-5xl font-medium">System & Process Augmentation</h2>
-                        <ul class="diamond-bullet my-6 md:my-10 text-left max-w-lg mx-auto">
+                        <h2 class="text-2xl sm:text-3xl md:text-4xl font-medium">System & Process Augmentation</h2>
+                        <ul class="diamond-bullet my-4 md:my-6 text-left max-w-md mx-auto">
                             <li>CONNECTING YOUR APPS TO WORK TOGETHER</li>
                             <li>BUILDING SYSTEMS TO CAPTURE & PROCESS LEADS</li>
                             <li>DIGITIZING YOUR REPETITIVE PAPERWORK</li>
-                            <li>CREATING CUSTOM TOOLS TO SIMPLIFY YOUR DAY</li>
                         </ul>
-                        <p class="text-base md:text-lg max-w-xl mx-auto" style="color: var(--muted-color);">For the solopreneur bogged down by tasks that take too long. I design intelligent systems that act as your digital assistant, freeing you up to focus on what truly matters.</p>
+                        <p class="text-sm md:text-base max-w-xl mx-auto" style="color: var(--muted-color);">I design intelligent systems that act as your digital assistant, freeing you up to focus on what truly matters.</p>
                     </div>
                 </div>
             </div>
@@ -211,14 +225,13 @@
                 <div class="slide-card">
                     <div class="shine-overlay"></div>
                     <div class="slide-card-inner text-center w-full">
-                        <h2 class="text-3xl md:text-5xl font-medium">CRM, Operations & Marketing Systems</h2>
-                        <ul class="diamond-bullet my-6 md:my-10 text-left max-w-lg mx-auto">
+                        <h2 class="text-2xl sm:text-3xl md:text-4xl font-medium">CRM & Operations</h2>
+                        <ul class="diamond-bullet my-4 md:my-6 text-left max-w-md mx-auto">
                             <li>INTEGRATED SCHEDULING & CRM SETUP</li>
                             <li>CUSTOM OPERATIONAL DASHBOARDS</li>
                             <li>STREAMLINED LEAD CAPTURE & OUTREACH</li>
-                            <li>SYSTEM MONITORING & PERFORMANCE ALERTS</li>
                         </ul>
-                        <p class="text-base md:text-lg max-w-xl mx-auto" style="color: var(--muted-color);">From capturing leads to managing projects – I create a central command center that plugs into your existing tools (like ClickUp, Monday, or Airtable) to keep you in control and informed.</p>
+                        <p class="text-sm md:text-base max-w-xl mx-auto" style="color: var(--muted-color);">I create a central command center that plugs into your existing tools (like ClickUp, Monday, or Airtable) to keep you in control.</p>
                     </div>
                 </div>
             </div>
@@ -228,13 +241,13 @@
                 <div class="slide-card">
                     <div class="shine-overlay"></div>
                     <div class="slide-card-inner text-center w-full">
-                        <h2 class="text-3xl md:text-5xl font-medium">Custom Data Processing & Tooling</h2>
-                        <ul class="diamond-bullet my-6 md:my-10 text-left max-w-lg mx-auto">
+                        <h2 class="text-2xl sm:text-3xl md:text-4xl font-medium">Custom Data Processing</h2>
+                        <ul class="diamond-bullet my-4 md:my-6 text-left max-w-md mx-auto">
                             <li>AUTOMATED DOCUMENT & DATA EXTRACTION</li>
                             <li>AUTOMATED CONTENT REPURPOSING</li>
                             <li>PERSONALIZED CONTENT AUTOMATION KITS</li>
                         </ul>
-                        <p class="text-base md:text-lg max-w-xl mx-auto" style="color: var(--muted-color);">For when you have valuable data trapped in documents or videos – I build tools to unlock it and put it to work for your business.</p>
+                        <p class="text-sm md:text-base max-w-xl mx-auto" style="color: var(--muted-color);">I build tools to unlock valuable data trapped in documents or videos and put it to work for your business.</p>
                     </div>
                 </div>
             </div>
@@ -244,25 +257,20 @@
                 <div class="slide-card">
                     <div class="shine-overlay"></div>
                     <div class="slide-card-inner text-center">
-                        <h2 class="text-4xl md:text-6xl font-medium">LET'S BUILD TOGETHER</h2>
-                        <h3 class="text-2xl md:text-3xl mt-4 font-normal">READY TO STREAMLINE YOUR BUSINESS?</h3>
-                        <p class="mt-8 text-lg md:text-xl max-w-2xl mx-auto" style="color: var(--muted-color);">Discover how custom-built systems can handle your repetitive work, giving you back valuable time. Click below to learn more and book a no-obligation discovery call.</p>
-                        <a href="https://russ-bytes.github.io/Profile/" target="_blank" rel="noopener noreferrer" class="inline-block mt-10 px-10 py-4 text-white rounded-full transition-all duration-300 transform hover:scale-105 shadow-lg" style="background-color: var(--accent-color); box-shadow: 0 4px 14px 0 rgba(56, 189, 248, 0.39);">LEARN MORE & BOOK CALL</a>
+                        <h2 class="text-3xl sm:text-4xl md:text-5xl font-medium">LET'S BUILD TOGETHER</h2>
+                        <h3 class="text-xl sm:text-2xl md:text-3xl mt-4 font-normal">READY TO STREAMLINE?</h3>
+                        <p class="mt-6 text-base md:text-lg max-w-2xl mx-auto" style="color: var(--muted-color);">Discover how custom systems can handle your repetitive work, giving you back valuable time. Click below to learn more.</p>
+                        <a href="https://russ-bytes.github.io/Profile/" target="_blank" rel="noopener noreferrer" class="inline-block mt-8 px-8 py-3 text-white rounded-full transition-all duration-300 transform hover:scale-105 shadow-lg" style="background-color: var(--accent-color); box-shadow: 0 4px 14px 0 rgba(56, 189, 248, 0.39);">LEARN MORE & BOOK CALL</a>
                     </div>
                 </div>
             </div>
         </div>
-
-        <!-- Navigation Buttons -->
-        <button id="prevBtn" class="absolute left-0 top-1/2 -translate-y-1/2 p-3 rounded-full text-gray-400 hover:text-white hover:bg-white/10 transition-all duration-300 focus:outline-none">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 19l-7-7 7-7" /></svg>
-        </button>
-        <button id="nextBtn" class="absolute right-0 top-1/2 -translate-y-1/2 p-3 rounded-full text-gray-400 hover:text-white hover:bg-white/10 transition-all duration-300 focus:outline-none">
+        
+        <button id="nextBtn" class="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 z-20 p-3 rounded-full text-gray-400 hover:text-white hover:bg-white/10 transition-all duration-300 focus:outline-none">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5l7 7-7 7" /></svg>
         </button>
-        
-        <!-- Page Indicator -->
-        <div id="pageIndicator" class="absolute bottom-0 left-1/2 -translate-x-1/2 flex space-x-3">
+
+        <div id="pageIndicator" class="absolute bottom-5 left-1/2 -translate-x-1/2 z-20 flex space-x-3">
             <!-- Indicators will be generated by JS -->
         </div>
     </div>
@@ -372,8 +380,8 @@
                     const { width, height, left, top } = card.getBoundingClientRect();
                     const x = e.clientX - left;
                     const y = e.clientY - top;
-                    const rotateX = -((y - height / 2) / height * 10).toFixed(2); // Reduced rotation for subtlety
-                    const rotateY = ((x - width / 2) / width * 10).toFixed(2);
+                    const rotateX = -((y - height / 2) / height * 8).toFixed(2); // Reduced rotation
+                    const rotateY = ((x - width / 2) / width * 8).toFixed(2);
                     
                     card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
                     
