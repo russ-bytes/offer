@@ -9,10 +9,10 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
-        /* --- V2.03 Dark Animated Theme --- */
+        /* --- V2.05 Dark Interactive Theme --- */
         :root {
             --bg-color: #111827; /* Dark blue-gray base */
-            --card-bg-color: rgba(31, 41, 55, 0.5); /* Semi-transparent card */
+            --card-bg-color: rgba(31, 41, 55, 0.7); /* Slightly more opaque card */
             --border-color: #4b5563;
             --text-color: #E5E7EB; /* Light gray for body */
             --heading-color: #F9FAFB; /* White for headings */
@@ -26,7 +26,7 @@
             font-family: 'Inter', sans-serif;
             background-color: var(--bg-color);
             color: var(--text-color);
-            overflow-x: hidden;
+            overflow: hidden; /* Important for canvas animations */
         }
         
         h1, h2, h3 {
@@ -34,55 +34,44 @@
             color: var(--heading-color);
         }
 
-        /* --- Animated Gradient Background --- */
+        /* --- Interactive Background --- */
         #background-animation-wrapper {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            overflow: hidden;
             z-index: 0;
         }
-        .background-base {
+        #node-canvas {
             position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(145deg, #1f2937, #111827);
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             z-index: 1;
         }
-        .gradient-layer {
+        #mouse-spotlight {
             position: absolute;
-            width: .001vmin; height: .001vmin;
-            border-radius: 50%;
-            opacity: .15;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at var(--x, 50%) var(--y, 50%), rgba(56, 189, 248, 0.08), transparent 30%);
             z-index: 2;
+            pointer-events: none;
+            transition: background 0.2s ease-out;
         }
-        .gradient-layer:nth-of-type(1) {
-            box-shadow: 0 0 45vmax 45vmax var(--accent-color);
-            animation: hue 10s 0s linear infinite, move1 19s 0s linear infinite;
-        }
-        .gradient-layer:nth-of-type(2) {
-            box-shadow: 0 0 45vmax 45vmax #4b5563;
-            animation: hue 15s 0s linear infinite, move2 25s 0s linear infinite;
-        }
-        .gradient-layer:nth-of-type(3) {
-            box-shadow: 0 0 45vmax 45vmax #0ea5e9;
-            animation: hue 20s 0s linear infinite, move3 15s 0s linear infinite;
-            opacity: .1;
-        }
-        @keyframes hue { 0% { filter: hue-rotate(0deg); } 100% { filter: hue-rotate(360deg); } }
-        @keyframes move1 { 0% { top: 0vh; left: 50vw; } 25% { left: 0vw; } 50% { top: 100vh; } 75% { left: 100vw; } 100% { top: 0vh; left: 50vw; } }
-        @keyframes move2 { 0% { top: 50vh; left: 100vw; } 25% { top: 100vh; } 50% { left: 0vw; } 75% { top: 0vh; } 100% { top: 50vh; left: 100vw; } }
-        @keyframes move3 { 0% { top: 100vh; left: 50vw; } 25% { left: 100vw; } 50% { top: 0vh; } 75% { left: 0vw; } 100% { top: 100vh; left: 50vw; } }
 
         /* --- Main Content & Slide Styles --- */
         .content-container {
             position: relative;
             z-index: 10;
         }
+        
         .slide-card {
             background-color: var(--card-bg-color);
-            backdrop-filter: blur(8px);
+            backdrop-filter: blur(12px);
             border: 1px solid var(--border-color);
             border-radius: 1rem;
             width: 100%;
@@ -90,7 +79,16 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            position: relative;
+            box-shadow: 0 0 40px rgba(56, 189, 248, 0.1);
+            transition: box-shadow 0.3s ease-in-out, border-color 0.3s ease-in-out;
         }
+
+        .slide-card:hover {
+             box-shadow: 0 0 60px rgba(56, 189, 248, 0.2);
+             border-color: var(--accent-color);
+        }
+
         .slide {
             transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
             position: absolute;
@@ -123,12 +121,10 @@
 </head>
 <body class="flex items-center justify-center min-h-screen antialiased">
 
-    <!-- Animated Gradient Background -->
+    <!-- Interactive Background -->
     <div id="background-animation-wrapper">
-        <div class="background-base"></div>
-        <div class="gradient-layer"></div>
-        <div class="gradient-layer"></div>
-        <div class="gradient-layer"></div>
+        <canvas id="node-canvas"></canvas>
+        <div id="mouse-spotlight"></div>
     </div>
 
     <!-- Main Content Container -->
@@ -233,62 +229,172 @@
     </div>
 
     <script>
-        // --- SCRIPT FOR SLIDE NAVIGATION (No changes needed here) ---
-        const slides = document.querySelectorAll('.slide');
-        const prevBtn = document.getElementById('prevBtn');
-        const nextBtn = document.getElementById('nextBtn');
-        const pageIndicatorContainer = document.getElementById('pageIndicator');
-        const totalSlides = slides.length;
-        let currentSlide = 0;
-
-        function updateView() {
-            slides.forEach((slide, index) => {
-                if (index === currentSlide) {
-                    slide.classList.remove('hidden');
-                    slide.classList.add('active');
-                } else {
-                    slide.classList.add('hidden');
-                    slide.classList.remove('active');
-                }
-            });
-            prevBtn.style.display = currentSlide === 0 ? 'none' : 'block';
-            nextBtn.style.display = currentSlide === totalSlides - 1 ? 'none' : 'block';
-            updateIndicators();
-        }
-        
-        function createIndicators() {
-            for (let i = 0; i < totalSlides; i++) {
-                const indicator = document.createElement('div');
-                indicator.classList.add('w-2.5', 'h-2.5', 'rounded-full', 'transition-all', 'duration-300');
-                indicator.dataset.index = i;
-                pageIndicatorContainer.appendChild(indicator);
-            }
-        }
-        
-        function updateIndicators() {
-            const indicators = pageIndicatorContainer.querySelectorAll('div');
-            indicators.forEach((indicator, index) => {
-                if (index === currentSlide) {
-                    indicator.style.backgroundColor = 'var(--accent-color)';
-                } else {
-                    indicator.style.backgroundColor = '#4B5563'; // gray-600
-                }
-            });
-        }
-
-        nextBtn.addEventListener('click', () => {
-            if (currentSlide < totalSlides - 1) { currentSlide++; updateView(); }
-        });
-        prevBtn.addEventListener('click', () => {
-            if (currentSlide > 0) { currentSlide--; updateView(); }
-        });
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'ArrowRight') { nextBtn.click(); } 
-            else if (e.key === 'ArrowLeft') { prevBtn.click(); }
-        });
         document.addEventListener('DOMContentLoaded', () => {
+            // --- Slide Navigation Logic ---
+            const slides = document.querySelectorAll('.slide');
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            const pageIndicatorContainer = document.getElementById('pageIndicator');
+            const totalSlides = slides.length;
+            let currentSlide = 0;
+
+            function updateView() {
+                slides.forEach((slide, index) => {
+                    slide.classList.toggle('active', index === currentSlide);
+                    slide.classList.toggle('hidden', index !== currentSlide);
+                });
+                prevBtn.style.display = currentSlide === 0 ? 'none' : 'block';
+                nextBtn.style.display = currentSlide === totalSlides - 1 ? 'none' : 'block';
+                updateIndicators();
+            }
+            
+            function createIndicators() {
+                for (let i = 0; i < totalSlides; i++) {
+                    const indicator = document.createElement('div');
+                    indicator.classList.add('w-2.5', 'h-2.5', 'rounded-full', 'transition-all', 'duration-300');
+                    indicator.dataset.index = i;
+                    pageIndicatorContainer.appendChild(indicator);
+                }
+            }
+            
+            function updateIndicators() {
+                const indicators = pageIndicatorContainer.querySelectorAll('div');
+                indicators.forEach((indicator, index) => {
+                    indicator.style.backgroundColor = index === currentSlide ? 'var(--accent-color)' : '#4B5563';
+                });
+            }
+
+            nextBtn.addEventListener('click', () => {
+                if (currentSlide < totalSlides - 1) { currentSlide++; updateView(); }
+            });
+            prevBtn.addEventListener('click', () => {
+                if (currentSlide > 0) { currentSlide--; updateView(); }
+            });
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowRight') { nextBtn.click(); } 
+                else if (e.key === 'ArrowLeft') { prevBtn.click(); }
+            });
+            
             createIndicators();
             updateView();
+
+            // --- Mouse Spotlight Effect ---
+            const spotlight = document.getElementById('mouse-spotlight');
+            window.addEventListener('mousemove', (e) => {
+                spotlight.style.setProperty('--x', e.clientX + 'px');
+                spotlight.style.setProperty('--y', e.clientY + 'px');
+            });
+
+            // --- Interactive Node Canvas Animation ---
+            const canvas = document.getElementById('node-canvas');
+            const ctx = canvas.getContext('2d');
+
+            let particlesArray;
+
+            // Mouse position
+            const mouse = {
+                x: null,
+                y: null,
+                radius: 150 // Area of effect
+            };
+
+            window.addEventListener('mousemove', (event) => {
+                mouse.x = event.x;
+                mouse.y = event.y;
+            });
+
+            // Particle class
+            class Particle {
+                constructor(x, y, directionX, directionY, size, color) {
+                    this.x = x;
+                    this.y = y;
+                    this.directionX = directionX;
+                    this.directionY = directionY;
+                    this.size = size;
+                    this.color = color;
+                }
+                // Method to draw individual particle
+                draw() {
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2, false);
+                    ctx.fillStyle = 'rgba(56, 189, 248, 0.5)';
+                    ctx.fill();
+                }
+                // Check particle position, mouse position, move the particle, draw the particle
+                update() {
+                    // Check if particle is still within canvas
+                    if (this.x > canvas.width || this.x < 0) {
+                        this.directionX = -this.directionX;
+                    }
+                    if (this.y > canvas.height || this.y < 0) {
+                        this.directionY = -this.directionY;
+                    }
+                    this.x += this.directionX;
+                    this.y += this.directionY;
+                    this.draw();
+                }
+            }
+
+            // Create particle array
+            function init() {
+                particlesArray = [];
+                let numberOfParticles = (canvas.height * canvas.width) / 9000;
+                for (let i = 0; i < numberOfParticles; i++) {
+                    let size = (Math.random() * 2) + 1;
+                    let x = (Math.random() * ((innerWidth - size * 2) - (size * 2)) + size * 2);
+                    let y = (Math.random() * ((innerHeight - size * 2) - (size * 2)) + size * 2);
+                    let directionX = (Math.random() * 0.4) - 0.2;
+                    let directionY = (Math.random() * 0.4) - 0.2;
+                    let color = 'rgba(56, 189, 248, 0.5)';
+                    particlesArray.push(new Particle(x, y, directionX, directionY, size, color));
+                }
+            }
+
+            // Animation loop
+            function animate() {
+                requestAnimationFrame(animate);
+                ctx.clearRect(0, 0, innerWidth, innerHeight);
+
+                for (let i = 0; i < particlesArray.length; i++) {
+                    particlesArray[i].update();
+                }
+                connect();
+            }
+
+            // Check if particles are close enough to draw line between them
+            function connect() {
+                let opacityValue = 1;
+                for (let a = 0; a < particlesArray.length; a++) {
+                    for (let b = a; b < particlesArray.length; b++) {
+                        let distance = ((particlesArray[a].x - particlesArray[b].x) * (particlesArray[a].x - particlesArray[b].x)) +
+                            ((particlesArray[a].y - particlesArray[b].y) * (particlesArray[a].y - particlesArray[b].y));
+                        
+                        if (distance < (canvas.width / 7) * (canvas.height / 7)) {
+                            opacityValue = 1 - (distance / 20000);
+                            ctx.strokeStyle = `rgba(56, 189, 248, ${opacityValue})`;
+                            ctx.lineWidth = 1;
+                            ctx.beginPath();
+                            ctx.moveTo(particlesArray[a].x, particlesArray[a].y);
+                            ctx.lineTo(particlesArray[b].x, particlesArray[b].y);
+                            ctx.stroke();
+                        }
+                    }
+                }
+            }
+
+            // Resize event
+            window.addEventListener('resize', () => {
+                canvas.width = innerWidth;
+                canvas.height = innerHeight;
+                init();
+            });
+            
+            // Set initial canvas size
+            canvas.width = innerWidth;
+            canvas.height = innerHeight;
+            
+            init();
+            animate();
         });
     </script>
 </body>
