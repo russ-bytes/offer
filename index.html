@@ -9,15 +9,29 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
-        /* --- V2.05 Dark Interactive Theme --- */
-        :root {
-            --bg-color: #111827; /* Dark blue-gray base */
-            --card-bg-color: rgba(31, 41, 55, 0.7); /* Slightly more opaque card */
+        /* --- V2.08 Theming & Layout --- */
+        :root { /* Dark Mode (Default) */
+            --bg-color: #111827;
+            --card-bg-color: rgba(31, 41, 55, 0.7);
             --border-color: #4b5563;
-            --text-color: #E5E7EB; /* Light gray for body */
-            --heading-color: #F9FAFB; /* White for headings */
-            --accent-color: #38bdf8; /* Bright blue accent */
-            --muted-color: #9CA3AF; /* Muted gray for descriptions */
+            --text-color: #E5E7EB;
+            --heading-color: #F9FAFB;
+            --accent-color: #38bdf8;
+            --muted-color: #9CA3AF;
+            --spotlight-color: rgba(56, 189, 248, 0.08);
+            --particle-rgb: 56, 189, 248;
+        }
+
+        body.light-mode { /* Light Mode */
+            --bg-color: #F9FAFB;
+            --card-bg-color: rgba(255, 255, 255, 0.7);
+            --border-color: #D1D5DB;
+            --text-color: #374151;
+            --heading-color: #111827;
+            --accent-color: #0ea5e9;
+            --muted-color: #6B7280;
+            --spotlight-color: rgba(14, 165, 233, 0.1);
+            --particle-rgb: 14, 165, 233;
         }
 
         html, body {
@@ -26,12 +40,14 @@
             font-family: 'Inter', sans-serif;
             background-color: var(--bg-color);
             color: var(--text-color);
-            overflow: hidden; /* Important for canvas animations */
+            overflow: hidden;
+            transition: background-color 0.5s ease;
         }
         
         h1, h2, h3 {
             font-family: 'Lora', serif;
             color: var(--heading-color);
+            transition: color 0.5s ease;
         }
 
         /* --- Interactive Background --- */
@@ -57,10 +73,10 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: radial-gradient(circle at var(--x, 50%) var(--y, 50%), rgba(56, 189, 248, 0.08), transparent 30%);
+            background: radial-gradient(circle at var(--x, 50%) var(--y, 50%), var(--spotlight-color), transparent 30%);
             z-index: 2;
             pointer-events: none;
-            transition: background 0.2s ease-out;
+            transition: background 0.5s ease;
         }
 
         /* --- Main Content & Slide Styles --- */
@@ -69,6 +85,17 @@
             z-index: 10;
         }
         
+        /* NEW: 3D Card Styles */
+        .slide {
+            transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            perspective: 1000px; /* Apply perspective to the slide container */
+        }
+        .slide.hidden { opacity: 0; pointer-events: none; transform: scale(0.98); }
+        .slide.active { opacity: 1; transform: scale(1); }
+
         .slide-card {
             background-color: var(--card-bg-color);
             backdrop-filter: blur(12px);
@@ -77,26 +104,38 @@
             width: 100%;
             height: 100%;
             display: flex;
-            align-items: center;
+            flex-direction: column;
             justify-content: center;
             position: relative;
             box-shadow: 0 0 40px rgba(56, 189, 248, 0.1);
-            transition: box-shadow 0.3s ease-in-out, border-color 0.3s ease-in-out;
+            padding: 2rem;
+            transform-style: preserve-3d; /* Enable 3D transformations */
+            transition: transform 0.1s ease-out, background-color 0.5s ease, box-shadow 0.3s ease, border-color 0.3s ease;
         }
 
-        .slide-card:hover {
-             box-shadow: 0 0 60px rgba(56, 189, 248, 0.2);
-             border-color: var(--accent-color);
+        .slide-card-inner { /* New inner wrapper for content */
+            transform: translateZ(40px); /* Push content forward */
         }
 
-        .slide {
-            transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+        .shine-overlay {
             position: absolute;
-            width: 100%;
-            height: 100%;
+            top: 0; left: 0; width: 100%; height: 100%;
+            border-radius: 1rem;
+            background: radial-gradient(circle at var(--shine-x, 50%) var(--shine-y, 50%), rgba(255, 255, 255, 0.1), transparent 40%);
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+            pointer-events: none;
         }
-        .slide.hidden { opacity: 0; pointer-events: none; transform: scale(0.98); }
-        .slide.active { opacity: 1; transform: scale(1); }
+        .slide-card:hover .shine-overlay {
+            opacity: 1;
+        }
+
+
+        @media (min-width: 768px) {
+            .slide-card {
+                padding: 3rem;
+            }
+        }
 
         /* --- Diamond Bullet Point Style --- */
         .diamond-bullet { list-style: none; padding-left: 0; }
@@ -104,9 +143,15 @@
             position: relative;
             padding-left: 2rem;
             margin-bottom: 1rem;
-            font-size: 1.125rem;
+            font-size: 1rem;
             line-height: 1.75rem;
             color: var(--text-color);
+            transition: color 0.5s ease;
+        }
+        @media (min-width: 768px) {
+            .diamond-bullet li {
+                font-size: 1.125rem;
+            }
         }
         .diamond-bullet li::before {
             content: '◆';
@@ -116,6 +161,7 @@
             color: var(--accent-color);
             font-size: 1.5rem;
             line-height: 1.75rem;
+            transition: color 0.5s ease;
         }
     </style>
 </head>
@@ -128,18 +174,17 @@
     </div>
 
     <!-- Main Content Container -->
-    <div class="content-container w-full max-w-4xl mx-auto p-4 md:p-8 relative">
+    <div class="content-container w-full max-w-4xl mx-auto px-16 md:px-8 relative">
         <div id="slides-container" class="relative w-full h-[70vh] md:h-[60vh]">
 
             <!-- Slide 1: Introduction -->
             <div id="slide-0" class="slide active">
                 <div class="slide-card">
-                    <div class="text-center p-6">
+                    <div class="shine-overlay"></div>
+                    <div class="slide-card-inner text-center">
                         <h2 class="text-4xl md:text-6xl font-medium tracking-wider">WHAT I OFFER:</h2>
                         <h1 class="text-2xl md:text-4xl mt-4 font-normal">AI-POWERED AUTOMATION & SYSTEMS</h1>
-                        <p class="mt-8 text-lg md:text-xl max-w-2xl mx-auto" style="color: var(--muted-color);">
-                            For founders and solopreneurs ready to simplify operations and scale with intelligent systems.
-                        </p>
+                        <p class="mt-8 text-lg md:text-xl max-w-2xl mx-auto" style="color: var(--muted-color);">For founders and solopreneurs ready to simplify operations and scale with intelligent systems.</p>
                     </div>
                 </div>
             </div>
@@ -147,17 +192,16 @@
             <!-- Slide 2: System & Process Augmentation -->
             <div id="slide-1" class="slide hidden">
                 <div class="slide-card">
-                    <div class="text-center p-6">
+                    <div class="shine-overlay"></div>
+                    <div class="slide-card-inner text-center w-full">
                         <h2 class="text-3xl md:text-5xl font-medium">System & Process Augmentation</h2>
-                        <ul class="diamond-bullet mt-10 text-left max-w-lg mx-auto">
+                        <ul class="diamond-bullet my-6 md:my-10 text-left max-w-lg mx-auto">
                             <li>CONNECTING YOUR APPS TO WORK TOGETHER</li>
                             <li>BUILDING SYSTEMS TO CAPTURE & PROCESS LEADS</li>
                             <li>DIGITIZING YOUR REPETITIVE PAPERWORK</li>
                             <li>CREATING CUSTOM TOOLS TO SIMPLIFY YOUR DAY</li>
                         </ul>
-                        <p class="mt-10 text-lg max-w-xl mx-auto" style="color: var(--muted-color);">
-                            For the solopreneur bogged down by tasks that take too long. I design intelligent systems that act as your digital assistant, freeing you up to focus on what truly matters.
-                        </p>
+                        <p class="text-base md:text-lg max-w-xl mx-auto" style="color: var(--muted-color);">For the solopreneur bogged down by tasks that take too long. I design intelligent systems that act as your digital assistant, freeing you up to focus on what truly matters.</p>
                     </div>
                 </div>
             </div>
@@ -165,34 +209,32 @@
             <!-- Slide 3: CRM & Operations -->
             <div id="slide-2" class="slide hidden">
                 <div class="slide-card">
-                    <div class="text-center p-6">
+                    <div class="shine-overlay"></div>
+                    <div class="slide-card-inner text-center w-full">
                         <h2 class="text-3xl md:text-5xl font-medium">CRM, Operations & Marketing Systems</h2>
-                        <ul class="diamond-bullet mt-10 text-left max-w-lg mx-auto">
+                        <ul class="diamond-bullet my-6 md:my-10 text-left max-w-lg mx-auto">
                             <li>INTEGRATED SCHEDULING & CRM SETUP</li>
                             <li>CUSTOM OPERATIONAL DASHBOARDS</li>
                             <li>STREAMLINED LEAD CAPTURE & OUTREACH</li>
                             <li>SYSTEM MONITORING & PERFORMANCE ALERTS</li>
                         </ul>
-                        <p class="mt-10 text-lg max-w-xl mx-auto" style="color: var(--muted-color);">
-                            From capturing leads to managing projects – I create a central command center that plugs into your existing tools (like ClickUp, Monday, or Airtable) to keep you in control and informed.
-                        </p>
+                        <p class="text-base md:text-lg max-w-xl mx-auto" style="color: var(--muted-color);">From capturing leads to managing projects – I create a central command center that plugs into your existing tools (like ClickUp, Monday, or Airtable) to keep you in control and informed.</p>
                     </div>
                 </div>
             </div>
 
-            <!-- Slide 4: Custom Data & Tooling -->
+            <!-- Slide 4: Custom Data Processing -->
             <div id="slide-3" class="slide hidden">
                 <div class="slide-card">
-                    <div class="text-center p-6">
+                    <div class="shine-overlay"></div>
+                    <div class="slide-card-inner text-center w-full">
                         <h2 class="text-3xl md:text-5xl font-medium">Custom Data Processing & Tooling</h2>
-                        <ul class="diamond-bullet mt-10 text-left max-w-lg mx-auto">
+                        <ul class="diamond-bullet my-6 md:my-10 text-left max-w-lg mx-auto">
                             <li>AUTOMATED DOCUMENT & DATA EXTRACTION</li>
                             <li>AUTOMATED CONTENT REPURPOSING</li>
                             <li>PERSONALIZED CONTENT AUTOMATION KITS</li>
                         </ul>
-                        <p class="mt-10 text-lg max-w-xl mx-auto" style="color: var(--muted-color);">
-                            For when you have valuable data trapped in documents or videos – I build tools to unlock it and put it to work for your business.
-                        </p>
+                        <p class="text-base md:text-lg max-w-xl mx-auto" style="color: var(--muted-color);">For when you have valuable data trapped in documents or videos – I build tools to unlock it and put it to work for your business.</p>
                     </div>
                 </div>
             </div>
@@ -200,33 +242,36 @@
             <!-- Slide 5: Call to Action -->
             <div id="slide-4" class="slide hidden">
                 <div class="slide-card">
-                    <div class="text-center p-6">
+                    <div class="shine-overlay"></div>
+                    <div class="slide-card-inner text-center">
                         <h2 class="text-4xl md:text-6xl font-medium">LET'S BUILD TOGETHER</h2>
                         <h3 class="text-2xl md:text-3xl mt-4 font-normal">READY TO STREAMLINE YOUR BUSINESS?</h3>
-                        <p class="mt-8 text-lg md:text-xl max-w-2xl mx-auto" style="color: var(--muted-color);">
-                            Discover how custom-built systems can handle your repetitive work, giving you back valuable time. Click below to learn more and book a no-obligation discovery call.
-                        </p>
-                        <a href="https://russ-bytes.github.io/Profile/" target="_blank" rel="noopener noreferrer" class="inline-block mt-10 px-10 py-4 text-white rounded-full transition-all duration-300 transform hover:scale-105 shadow-lg" style="background-color: var(--accent-color); box-shadow: 0 4px 14px 0 rgba(56, 189, 248, 0.39);">
-                            LEARN MORE & BOOK CALL
-                        </a>
+                        <p class="mt-8 text-lg md:text-xl max-w-2xl mx-auto" style="color: var(--muted-color);">Discover how custom-built systems can handle your repetitive work, giving you back valuable time. Click below to learn more and book a no-obligation discovery call.</p>
+                        <a href="https://russ-bytes.github.io/Profile/" target="_blank" rel="noopener noreferrer" class="inline-block mt-10 px-10 py-4 text-white rounded-full transition-all duration-300 transform hover:scale-105 shadow-lg" style="background-color: var(--accent-color); box-shadow: 0 4px 14px 0 rgba(56, 189, 248, 0.39);">LEARN MORE & BOOK CALL</a>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- Navigation Buttons -->
-        <button id="prevBtn" class="absolute left-0 md:-left-4 top-1/2 -translate-y-1/2 p-3 rounded-full bg-gray-900/50 backdrop-blur-sm border border-gray-600 shadow-lg hover:bg-gray-800 transition-all duration-300 focus:outline-none">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+        <button id="prevBtn" class="absolute left-0 top-1/2 -translate-y-1/2 p-3 rounded-full text-gray-400 hover:text-white hover:bg-white/10 transition-all duration-300 focus:outline-none">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 19l-7-7 7-7" /></svg>
         </button>
-        <button id="nextBtn" class="absolute right-0 md:-right-4 top-1/2 -translate-y-1/2 p-3 rounded-full bg-gray-900/50 backdrop-blur-sm border border-gray-600 shadow-lg hover:bg-gray-800 transition-all duration-300 focus:outline-none">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+        <button id="nextBtn" class="absolute right-0 top-1/2 -translate-y-1/2 p-3 rounded-full text-gray-400 hover:text-white hover:bg-white/10 transition-all duration-300 focus:outline-none">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5l7 7-7 7" /></svg>
         </button>
         
         <!-- Page Indicator -->
-        <div id="pageIndicator" class="absolute -bottom-4 left-1/2 -translate-x-1/2 flex space-x-3">
+        <div id="pageIndicator" class="absolute bottom-0 left-1/2 -translate-x-1/2 flex space-x-3">
             <!-- Indicators will be generated by JS -->
         </div>
     </div>
+
+    <!-- Theme Toggle Button -->
+    <button id="themeToggle" class="fixed bottom-5 right-5 z-20 p-3 rounded-full bg-black/20 backdrop-blur-sm border border-white/10 text-white/80 shadow-lg hover:border-white/20 transition-all duration-300 focus:outline-none">
+        <svg id="theme-icon-sun" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M12 12a5 5 0 100-10 5 5 0 000 10z" /></svg>
+        <svg id="theme-icon-moon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>
+    </button>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -251,8 +296,12 @@
             function createIndicators() {
                 for (let i = 0; i < totalSlides; i++) {
                     const indicator = document.createElement('div');
-                    indicator.classList.add('w-2.5', 'h-2.5', 'rounded-full', 'transition-all', 'duration-300');
+                    indicator.classList.add('w-2.5', 'h-2.5', 'rounded-full', 'transition-all', 'duration-300', 'cursor-pointer');
                     indicator.dataset.index = i;
+                    indicator.addEventListener('click', () => {
+                        currentSlide = i;
+                        updateView();
+                    });
                     pageIndicatorContainer.appendChild(indicator);
                 }
             }
@@ -260,24 +309,18 @@
             function updateIndicators() {
                 const indicators = pageIndicatorContainer.querySelectorAll('div');
                 indicators.forEach((indicator, index) => {
-                    indicator.style.backgroundColor = index === currentSlide ? 'var(--accent-color)' : '#4B5563';
+                    const indicatorColor = document.body.classList.contains('light-mode') ? '#9CA3AF' : '#4B5563';
+                    indicator.style.backgroundColor = index === currentSlide ? 'var(--accent-color)' : indicatorColor;
                 });
             }
 
-            nextBtn.addEventListener('click', () => {
-                if (currentSlide < totalSlides - 1) { currentSlide++; updateView(); }
-            });
-            prevBtn.addEventListener('click', () => {
-                if (currentSlide > 0) { currentSlide--; updateView(); }
-            });
+            nextBtn.addEventListener('click', () => { if (currentSlide < totalSlides - 1) { currentSlide++; updateView(); } });
+            prevBtn.addEventListener('click', () => { if (currentSlide > 0) { currentSlide--; updateView(); } });
             document.addEventListener('keydown', (e) => {
                 if (e.key === 'ArrowRight') { nextBtn.click(); } 
                 else if (e.key === 'ArrowLeft') { prevBtn.click(); }
             });
             
-            createIndicators();
-            updateView();
-
             // --- Mouse Spotlight Effect ---
             const spotlight = document.getElementById('mouse-spotlight');
             window.addEventListener('mousemove', (e) => {
@@ -285,93 +328,112 @@
                 spotlight.style.setProperty('--y', e.clientY + 'px');
             });
 
+            // --- Theme Toggle Logic ---
+            const themeToggle = document.getElementById('themeToggle');
+            const body = document.body;
+            const sunIcon = document.getElementById('theme-icon-sun');
+            const moonIcon = document.getElementById('theme-icon-moon');
+
+            function setInitialTheme() {
+                const savedTheme = localStorage.getItem('theme');
+                if (savedTheme === 'light') { body.classList.add('light-mode'); } 
+                else if (savedTheme === 'dark') { body.classList.remove('light-mode'); } 
+                else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) { body.classList.add('light-mode'); }
+                updateThemeIcons();
+            }
+
+            function updateThemeIcons() {
+                 const isLight = body.classList.contains('light-mode');
+                 sunIcon.classList.toggle('hidden', isLight);
+                 moonIcon.classList.toggle('hidden', !isLight);
+                 const themeToggleButton = document.getElementById('themeToggle');
+                 if(isLight) {
+                    themeToggleButton.classList.remove('bg-black/20', 'border-white/10', 'text-white/80', 'hover:border-white/20');
+                    themeToggleButton.classList.add('bg-white/20', 'border-black/10', 'text-black/80', 'hover:border-black/20');
+                 } else {
+                    themeToggleButton.classList.add('bg-black/20', 'border-white/10', 'text-white/80', 'hover:border-white/20');
+                    themeToggleButton.classList.remove('bg-white/20', 'border-black/10', 'text-black/80', 'hover:border-black/20');
+                 }
+            }
+
+            themeToggle.addEventListener('click', () => {
+                body.classList.toggle('light-mode');
+                localStorage.setItem('theme', body.classList.contains('light-mode') ? 'light' : 'dark');
+                updateThemeIcons();
+                updateIndicators();
+                init();
+            });
+
+            // --- 3D Card Tilt Effect ---
+            const cards = document.querySelectorAll('.slide-card');
+            cards.forEach(card => {
+                const shine = card.querySelector('.shine-overlay');
+                card.addEventListener('mousemove', (e) => {
+                    const { width, height, left, top } = card.getBoundingClientRect();
+                    const x = e.clientX - left;
+                    const y = e.clientY - top;
+                    const rotateX = -((y - height / 2) / height * 10).toFixed(2); // Reduced rotation for subtlety
+                    const rotateY = ((x - width / 2) / width * 10).toFixed(2);
+                    
+                    card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+                    
+                    if (shine) {
+                        shine.style.setProperty('--shine-x', `${x}px`);
+                        shine.style.setProperty('--shine-y', `${y}px`);
+                    }
+                });
+
+                card.addEventListener('mouseleave', () => {
+                    card.style.transform = 'rotateX(0deg) rotateY(0deg)';
+                });
+            });
+
+
             // --- Interactive Node Canvas Animation ---
             const canvas = document.getElementById('node-canvas');
             const ctx = canvas.getContext('2d');
-
             let particlesArray;
+            let particleRgb;
 
-            // Mouse position
-            const mouse = {
-                x: null,
-                y: null,
-                radius: 150 // Area of effect
-            };
-
-            window.addEventListener('mousemove', (event) => {
-                mouse.x = event.x;
-                mouse.y = event.y;
-            });
-
-            // Particle class
             class Particle {
-                constructor(x, y, directionX, directionY, size, color) {
-                    this.x = x;
-                    this.y = y;
-                    this.directionX = directionX;
-                    this.directionY = directionY;
-                    this.size = size;
-                    this.color = color;
-                }
-                // Method to draw individual particle
-                draw() {
-                    ctx.beginPath();
-                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2, false);
-                    ctx.fillStyle = 'rgba(56, 189, 248, 0.5)';
-                    ctx.fill();
-                }
-                // Check particle position, mouse position, move the particle, draw the particle
+                constructor(x, y, directionX, directionY, size) { this.x = x; this.y = y; this.directionX = directionX; this.directionY = directionY; this.size = size; }
+                draw() { ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2, false); ctx.fillStyle = `rgba(${particleRgb}, 0.5)`; ctx.fill(); }
                 update() {
-                    // Check if particle is still within canvas
-                    if (this.x > canvas.width || this.x < 0) {
-                        this.directionX = -this.directionX;
-                    }
-                    if (this.y > canvas.height || this.y < 0) {
-                        this.directionY = -this.directionY;
-                    }
-                    this.x += this.directionX;
-                    this.y += this.directionY;
-                    this.draw();
+                    if (this.x > canvas.width || this.x < 0) { this.directionX = -this.directionX; }
+                    if (this.y > canvas.height || this.y < 0) { this.directionY = -this.directionY; }
+                    this.x += this.directionX; this.y += this.directionY; this.draw();
                 }
             }
 
-            // Create particle array
             function init() {
+                particleRgb = getComputedStyle(body).getPropertyValue('--particle-rgb').trim();
                 particlesArray = [];
-                let numberOfParticles = (canvas.height * canvas.width) / 9000;
+                let numberOfParticles = (canvas.height * canvas.width) / 7500;
                 for (let i = 0; i < numberOfParticles; i++) {
                     let size = (Math.random() * 2) + 1;
                     let x = (Math.random() * ((innerWidth - size * 2) - (size * 2)) + size * 2);
                     let y = (Math.random() * ((innerHeight - size * 2) - (size * 2)) + size * 2);
                     let directionX = (Math.random() * 0.4) - 0.2;
                     let directionY = (Math.random() * 0.4) - 0.2;
-                    let color = 'rgba(56, 189, 248, 0.5)';
-                    particlesArray.push(new Particle(x, y, directionX, directionY, size, color));
+                    particlesArray.push(new Particle(x, y, directionX, directionY, size));
                 }
             }
 
-            // Animation loop
             function animate() {
                 requestAnimationFrame(animate);
                 ctx.clearRect(0, 0, innerWidth, innerHeight);
-
-                for (let i = 0; i < particlesArray.length; i++) {
-                    particlesArray[i].update();
-                }
+                for (let i = 0; i < particlesArray.length; i++) { particlesArray[i].update(); }
                 connect();
             }
 
-            // Check if particles are close enough to draw line between them
             function connect() {
                 let opacityValue = 1;
                 for (let a = 0; a < particlesArray.length; a++) {
                     for (let b = a; b < particlesArray.length; b++) {
-                        let distance = ((particlesArray[a].x - particlesArray[b].x) * (particlesArray[a].x - particlesArray[b].x)) +
-                            ((particlesArray[a].y - particlesArray[b].y) * (particlesArray[a].y - particlesArray[b].y));
-                        
+                        let distance = ((particlesArray[a].x - particlesArray[b].x) ** 2) + ((particlesArray[a].y - particlesArray[b].y) ** 2);
                         if (distance < (canvas.width / 7) * (canvas.height / 7)) {
                             opacityValue = 1 - (distance / 20000);
-                            ctx.strokeStyle = `rgba(56, 189, 248, ${opacityValue})`;
+                            ctx.strokeStyle = `rgba(${particleRgb}, ${opacityValue})`;
                             ctx.lineWidth = 1;
                             ctx.beginPath();
                             ctx.moveTo(particlesArray[a].x, particlesArray[a].y);
@@ -382,19 +444,13 @@
                 }
             }
 
-            // Resize event
-            window.addEventListener('resize', () => {
-                canvas.width = innerWidth;
-                canvas.height = innerHeight;
-                init();
-            });
+            window.addEventListener('resize', () => { canvas.width = innerWidth; canvas.height = innerHeight; init(); });
             
-            // Set initial canvas size
-            canvas.width = innerWidth;
-            canvas.height = innerHeight;
-            
+            createIndicators();
+            setInitialTheme();
             init();
             animate();
+            updateView();
         });
     </script>
 </body>
